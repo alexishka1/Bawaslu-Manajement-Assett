@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\ItemReports\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Table;
 
 class ItemReportsTable

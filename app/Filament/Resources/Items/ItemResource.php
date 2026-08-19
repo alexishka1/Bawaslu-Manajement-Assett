@@ -36,12 +36,12 @@ class ItemResource extends Resource
 
     public static function form(\Filament\Schemas\Schema $form): \Filament\Schemas\Schema
     {
-        return ItemForm::configure($schema);
+        return ItemForm::configure($form);
     }
 
     public static function infolist(\Filament\Schemas\Schema $infolist): \Filament\Schemas\Schema
     {
-        return ItemInfolist::configure($schema);
+        return ItemInfolist::configure($infolist);
     }
 
     public static function table(Table $table): Table
