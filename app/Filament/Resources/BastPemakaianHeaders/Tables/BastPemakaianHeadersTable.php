@@ -89,6 +89,12 @@ class BastPemakaianHeadersTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('cetak_bast')
+                    ->label('Cetak BAST PDF')
+                    ->icon('heroicon-o-printer')
+                    ->color('info')
+                    ->url(fn (BastPemakaianHeader $record) => route('bast.pemakaian.download', $record))
+                    ->openUrlInNewTab(),
                 Action::make('finalize')
                     ->label('Terbitkan BAST')
                     ->icon('heroicon-o-check-badge')

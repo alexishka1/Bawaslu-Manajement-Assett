@@ -5,7 +5,6 @@ use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScanController;
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\HomeController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -17,8 +16,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Dilindungi auth (Staff dan Admin)
 Route::middleware(['auth'])->group(function () {
-    // Admin Only Cetak
+    // Admin Only Cetak BAST & QR Code
     Route::get('/bast/{transaction}/download', [BastController::class, 'download'])->name('bast.download');
+    Route::get('/bast-pemakaian/{header}/download', [BastController::class, 'downloadPemakaian'])->name('bast.pemakaian.download');
+    Route::get('/bast-pengembalian/{header}/download', [BastController::class, 'downloadPengembalian'])->name('bast.pengembalian.download');
     Route::get('/qrcode/{item}/download', [QrCodeController::class, 'download'])->name('qrcode.download');
 
     // Scan Routes (Staff - Authenticated)
