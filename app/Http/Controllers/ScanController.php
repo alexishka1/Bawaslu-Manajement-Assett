@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
-use App\Models\ItemReport;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreItemReportRequest;
+use App\Services\ItemService;
+use App\Services\ReportService;
 use Illuminate\Support\Facades\Auth;
 
 class ScanController extends Controller
 {
+    public function __construct(
+        protected ItemService $itemService,
+        protected ReportService $reportService
+    ) {}
+
     public function index()
     {
         return view('scanner');
@@ -16,29 +21,24 @@ class ScanController extends Controller
 
     public function show($kode_bmn)
     {
-        $item = Item::where('kode_bmn', $kode_bmn)->firstOrFail();
+        $item = $this->itemService->findByKodeBmn($kode_bmn);
+
         return view('scan', compact('item'));
     }
 
-    public function store(Request $request, $kode_bmn)
+    public function store(StoreItemReportRequest $request, $kode_bmn)
     {
-        $item = Item::where('kode_bmn', $kode_bmn)->firstOrFail();
-
-        $request->validate([
-            'kondisi_aktual' => 'required|in:tersedia,terpakai,servis,rusak,hilang',
-            'foto_bukti' => 'required|image|max:5120', // Maks 5MB
-            'catatan' => 'nullable|string',
-        ]);
+        $item = $this->itemService->findByKodeBmn($kode_bmn);
 
         $path = $request->file('foto_bukti')->store('reports', 'public');
 
-        ItemReport::create([
-            'item_id' => $item->id,
-            'user_id' => Auth::id(),
-            'kondisi_aktual' => $request->kondisi_aktual,
-            'catatan' => $request->catatan,
-            'foto_bukti' => $path,
-        ]);
+        $this->reportService->submitReport(
+            item: $item,
+            userId: Auth::id(),
+            kondisiAktual: $request->validated('kondisi_aktual'),
+            catatan: $request->validated('catatan'),
+            fotoBuktiPath: $path
+        );
 
         return redirect()->route('scan.show', $kode_bmn)->with('success', 'Laporan berhasil dikirim! Menunggu validasi admin.');
     }

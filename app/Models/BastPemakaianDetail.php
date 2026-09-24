@@ -12,6 +12,10 @@ class BastPemakaianDetail extends Model
 
     protected $table = 'bast_pemakaian_details';
 
+    protected $attributes = [
+        'status_item' => 'dipakai',
+    ];
+
     protected $fillable = [
         'bast_header_id',
         'item_id',
@@ -22,7 +26,7 @@ class BastPemakaianDetail extends Model
     protected static function booted(): void
     {
         static::saved(function ($detail) {
-            if ($detail->header && $detail->header->status_dokumen === 'final' && $detail->status_item === 'dipakai') {
+            if ($detail->header && $detail->header->status_dokumen === 'final' && ($detail->status_item ?? 'dipakai') === 'dipakai') {
                 if ($detail->item && $detail->item->status === 'tersedia') {
                     $detail->item->update(['status' => 'terpakai']);
                 }

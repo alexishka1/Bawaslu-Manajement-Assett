@@ -5,11 +5,13 @@ namespace App\Filament\Resources\BastPemakaianHeaders\Schemas;
 use App\Models\Item;
 use App\Models\RefPegawai;
 use App\Models\RefPejabat;
-use Filament\Schemas\Components\DatePicker;
-use Filament\Schemas\Components\Repeater;
+use Fahiem\FilamentPinpoint\Pinpoint;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class BastPemakaianHeaderForm
@@ -103,6 +105,43 @@ class BastPemakaianHeaderForm
                             ->columnSpan(1),
                     ]),
 
+                Section::make('Bukti Lokasi Peminjam')
+                    ->description('Input alamat peminjam dan tentukan titik lokasi yang akurat di peta sebagai bukti tracking.')
+                    ->schema([
+                        Textarea::make('alamat_peminjam')
+                            ->label('Alamat Lengkap Peminjam / Kantor Tujuan')
+                            ->placeholder('Ketik nama jalan, RT/RW, kelurahan, kecamatan, atau nama gedung...')
+                            ->rows(2)
+                            ->columnSpanFull(),
+
+                        Pinpoint::make('location')
+                            ->label('Titik Peta Lokasi (OpenStreetMap / Leaflet)')
+                            ->provider('leaflet')
+                            ->latField('latitude')
+                            ->lngField('longitude')
+                            ->addressField('alamat_peminjam')
+                            ->defaultLocation(-5.3971, 105.2668)
+                            ->defaultZoom(13)
+                            ->height(400)
+                            ->draggable()
+                            ->searchable()
+                            ->helperText('Gunakan kotak pencarian di dalam peta atau geser pin ke titik rumah/kantor peminjam.')
+                            ->columnSpanFull(),
+
+                        TextInput::make('latitude')
+                            ->label('Latitude')
+                            ->numeric()
+                            ->readOnly()
+                            ->columnSpan(1),
+
+                        TextInput::make('longitude')
+                            ->label('Longitude')
+                            ->numeric()
+                            ->readOnly()
+                            ->columnSpan(1),
+                    ])
+                    ->columns(2),
+
                 Section::make('Daftar Barang BMN yang Diserahterimakan')
                     ->description('Pilih barang yang berstatus Tersedia untuk dimasukkan ke dalam dokumen BAST ini.')
                     ->schema([
@@ -114,10 +153,13 @@ class BastPemakaianHeaderForm
                                 Select::make('item_id')
                                     ->label('Pilih Barang BMN')
                                     ->required()
-                                    ->options(function ($record) {
+                                    ->options(function ($record, $get) {
+                                        $currentId = $get('item_id') ?? $record?->item_id;
+
                                         return Item::where('status', 'tersedia')
+                                            ->when($currentId, fn ($q) => $q->orWhere('id', $currentId))
                                             ->get()
-                                            ->mapWithKeys(fn ($item) => [$item->id => $item->kode_bmn . ' — ' . $item->nama_barang . ' (' . $item->kategori . ')']);
+                                            ->mapWithKeys(fn ($item) => [$item->id => $item->kode_bmn.' — '.$item->nama_barang.' ('.$item->kategori.')']);
                                     })
                                     ->searchable()
                                     ->native(false)

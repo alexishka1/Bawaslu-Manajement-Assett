@@ -5,23 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\BastPemakaianHeader;
 use App\Models\BastPengembalianHeader;
 use App\Models\ItemTransaction;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\BastService;
+use Illuminate\Support\Facades\Gate;
 
 class BastController extends Controller
 {
+    public function __construct(
+        protected BastService $bastService
+    ) {}
+
     /**
      * Download BAST Peminjaman Single-Item (Modul Lama / Existing).
      */
     public function download(ItemTransaction $transaction)
     {
-        $transaction->load('item');
+        Gate::authorize('view', $transaction);
 
-        $pdf = Pdf::loadView('pdf.bast', compact('transaction'))
-            ->setPaper('a4', 'portrait');
+        if (! auth()->user()?->isAdmin()) {
+            abort(403, 'Hanya Administrator yang memiliki wewenang untuk mengunduh dokumen resmi BAST.');
+        }
 
-        $filename = 'BAST_' . ($transaction->item->kode_bmn ?? 'N-A') . '_' . $transaction->tanggal_pinjam->format('Ymd') . '.pdf';
+        $result = $this->bastService->generateSingleBastPdf($transaction);
 
-        return $pdf->download($filename);
+        return $result['pdf']->download($result['filename']);
     }
 
     /**
@@ -29,15 +35,11 @@ class BastController extends Controller
      */
     public function downloadPemakaian(BastPemakaianHeader $header)
     {
-        $header->load(['details.item', 'pihakPertama', 'pihakKedua', 'pembuat']);
+        Gate::authorize('view', $header);
 
-        $pdf = Pdf::loadView('pdf.bast-pemakaian', compact('header'))
-            ->setPaper('a4', 'portrait');
+        $result = $this->bastService->generatePemakaianPdf($header);
 
-        $safeNomor = str_replace(['/', '\\', ' '], '_', $header->nomor_bast ?? 'DRAFT_' . $header->id);
-        $filename = 'BAST_PEMAKAIAN_' . $safeNomor . '.pdf';
-
-        return $pdf->download($filename);
+        return $result['pdf']->download($result['filename']);
     }
 
     /**
@@ -45,14 +47,10 @@ class BastController extends Controller
      */
     public function downloadPengembalian(BastPengembalianHeader $header)
     {
-        $header->load(['details.item', 'pihakMenyerahkan', 'pihakMenerima', 'pembuat']);
+        Gate::authorize('view', $header);
 
-        $pdf = Pdf::loadView('pdf.bast-pengembalian', compact('header'))
-            ->setPaper('a4', 'portrait');
+        $result = $this->bastService->generatePengembalianPdf($header);
 
-        $safeNomor = str_replace(['/', '\\', ' '], '_', $header->nomor_bast_pengembalian ?? 'DRAFT_' . $header->id);
-        $filename = 'BAST_PENGEMBALIAN_' . $safeNomor . '.pdf';
-
-        return $pdf->download($filename);
+        return $result['pdf']->download($result['filename']);
     }
 }

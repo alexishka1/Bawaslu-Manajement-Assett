@@ -13,7 +13,6 @@ use App\Models\ItemTransaction;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class ItemTransactionResource extends Resource
@@ -34,12 +33,12 @@ class ItemTransactionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nama_peminjam';
 
-    public static function form(\Filament\Schemas\Schema $form): \Filament\Schemas\Schema
+    public static function form(Schema $form): Schema
     {
         return ItemTransactionForm::configure($form);
     }
 
-    public static function infolist(\Filament\Schemas\Schema $infolist): \Filament\Schemas\Schema
+    public static function infolist(Schema $infolist): Schema
     {
         return ItemTransactionInfolist::configure($infolist);
     }
@@ -66,4 +65,3 @@ class ItemTransactionResource extends Resource
         ];
     }
 }
-

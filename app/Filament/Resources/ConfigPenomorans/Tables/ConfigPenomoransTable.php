@@ -49,6 +49,7 @@ class ConfigPenomoransTable
                     ->label('Filter Tahun')
                     ->options(function () {
                         $currentYear = (int) date('Y');
+
                         return [
                             $currentYear => (string) $currentYear,
                             $currentYear - 1 => (string) ($currentYear - 1),

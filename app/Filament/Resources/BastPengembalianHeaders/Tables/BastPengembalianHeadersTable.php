@@ -36,7 +36,7 @@ class BastPengembalianHeadersTable
                     ->label('Yang Mengembalikan')
                     ->searchable(query: function ($query, string $search) {
                         $query->whereHas('pihakMenyerahkan', fn ($q) => $q->where('nama', 'like', "%{$search}%"))
-                              ->orWhere('pihak_menyerahkan_nama_manual', 'like', "%{$search}%");
+                            ->orWhere('pihak_menyerahkan_nama_manual', 'like', "%{$search}%");
                     }),
 
                 TextColumn::make('pihakMenerima.nama')
@@ -60,6 +60,41 @@ class BastPengembalianHeadersTable
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state))
                     ->sortable(),
+
+                TextColumn::make('ttd_status')
+                    ->label('Status TTD')
+                    ->badge()
+                    ->state(function (BastPengembalianHeader $record): string {
+                        $signed = 0;
+                        if (! empty($record->ttd_pihak1_url)) {
+                            $signed++;
+                        }
+                        if (! empty($record->ttd_pihak2_url)) {
+                            $signed++;
+                        }
+
+                        return match ($signed) {
+                            2 => 'Lengkap (2/2)',
+                            1 => 'Parsial (1/2)',
+                            default => 'Belum TTD (0/2)',
+                        };
+                    })
+                    ->color(function (BastPengembalianHeader $record): string {
+                        $signed = 0;
+                        if (! empty($record->ttd_pihak1_url)) {
+                            $signed++;
+                        }
+                        if (! empty($record->ttd_pihak2_url)) {
+                            $signed++;
+                        }
+
+                        return match ($signed) {
+                            2 => 'success',
+                            1 => 'warning',
+                            default => 'gray',
+                        };
+                    })
+                    ->alignCenter(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
@@ -73,6 +108,15 @@ class BastPengembalianHeadersTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('tanda_tangan')
+                    ->label('Tanda Tangan')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
+                    ->modalHeading(fn (BastPengembalianHeader $record) => 'Tanda Tangan Digital - '.($record->nomor_bast_pengembalian ?? 'DRAFT'))
+                    ->modalDescription('Buka antarmuka tanda tangan atau minta pegawai scan QR Code di bawah untuk tanda tangan di HP.')
+                    ->modalContent(fn (BastPengembalianHeader $record) => view('filament.actions.bast-pengembalian-ttd-modal', ['record' => $record]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup'),
                 Action::make('cetak_bast')
                     ->label('Cetak BAST PDF')
                     ->icon('heroicon-o-printer')
@@ -91,7 +135,7 @@ class BastPengembalianHeadersTable
                         $record->update(['status_dokumen' => 'final']);
                         Notification::make()
                             ->title('BAST Pengembalian Diterbitkan')
-                            ->body('Nomor dokumen: ' . $record->nomor_bast_pengembalian)
+                            ->body('Nomor dokumen: '.$record->nomor_bast_pengembalian)
                             ->success()
                             ->send();
                     }),

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\RefPegawais\Schemas;
 
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class RefPegawaiForm

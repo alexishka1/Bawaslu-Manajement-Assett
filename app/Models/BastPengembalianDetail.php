@@ -22,6 +22,15 @@ class BastPengembalianDetail extends Model
 
     protected static function booted(): void
     {
+        static::creating(function ($detail) {
+            if (empty($detail->item_id) && $detail->bast_pemakaian_detail_id) {
+                $pemakaian = BastPemakaianDetail::find($detail->bast_pemakaian_detail_id);
+                if ($pemakaian) {
+                    $detail->item_id = $pemakaian->item_id;
+                }
+            }
+        });
+
         static::saved(function ($detail) {
             if ($detail->header && $detail->header->status_dokumen === 'final') {
                 if ($detail->pemakaianDetail) {

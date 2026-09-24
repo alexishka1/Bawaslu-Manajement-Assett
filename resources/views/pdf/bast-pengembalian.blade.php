@@ -146,6 +146,14 @@
             color: #444;
         }
 
+        .verifikasi-box {
+            margin-top: 15px;
+            border: 1px dashed #9ca3af;
+            background-color: #f9fafb;
+            padding: 8px 12px;
+            page-break-inside: avoid;
+        }
+
         .footer {
             position: fixed;
             bottom: 20px;
@@ -265,7 +273,9 @@
                     <div class="label">Yang Menyerahkan Kembali</div>
                     <div class="label">(Pengembali)</div>
                     <div class="space-ttd">
-                        @if($header->ttd_pihak1_url)
+                        @if(!empty($ttdPihak1Base64))
+                            <img src="{{ $ttdPihak1Base64 }}" alt="TTD Pengembali">
+                        @elseif($header->ttd_pihak1_url)
                             <img src="{{ $header->ttd_pihak1_url }}" alt="TTD Pengembali">
                         @endif
                     </div>
@@ -277,7 +287,9 @@
                     <div class="label">Yang Menerima Kembali</div>
                     <div class="label">(Pejabat BMN)</div>
                     <div class="space-ttd">
-                        @if($header->ttd_pihak2_url)
+                        @if(!empty($ttdPihak2Base64))
+                            <img src="{{ $ttdPihak2Base64 }}" alt="TTD Pejabat">
+                        @elseif($header->ttd_pihak2_url)
                             <img src="{{ $header->ttd_pihak2_url }}" alt="TTD Pejabat">
                         @endif
                     </div>
@@ -288,6 +300,24 @@
             </tr>
         </table>
     </div>
+
+    @if(isset($qrCodeBase64))
+    <div class="verifikasi-box">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 80px; text-align: center; vertical-align: middle;">
+                    <img src="{{ $qrCodeBase64 }}" width="70" height="70" alt="QR Validasi">
+                </td>
+                <td style="vertical-align: middle; padding-left: 10px; font-size: 8pt; line-height: 1.35; color: #374151;">
+                    <strong style="color: #111827; font-size: 8.5pt;">DOKUMEN DITANDATANGANI SECARA ELEKTRONIK (DIGITAL)</strong><br>
+                    Dokumen Pengembalian BAST ini terdaftar sah dalam Sistem Informasi Manajemen Aset BMN Bawaslu.<br>
+                    Pindai (scan) QR Code di samping untuk memeriksa integritas data atau kunjungi:<br>
+                    <span style="color: #b91c1c; text-decoration: underline;">{{ $verifyUrl ?? url('/verify/bast-pengembalian/' . $header->id) }}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+    @endif
 
     <div class="footer">
         Dokumen Pengembalian Resmi — Dicetak otomatis oleh Sistem Manajemen Aset BMN Bawaslu pada {{ now()->translatedFormat('d F Y, H:i') }} WIB

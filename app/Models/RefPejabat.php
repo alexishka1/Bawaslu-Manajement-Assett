@@ -10,8 +10,11 @@ class RefPejabat extends Model
     use HasFactory;
 
     protected $table = 'ref_pejabats';
+
     protected $primaryKey = 'nip';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

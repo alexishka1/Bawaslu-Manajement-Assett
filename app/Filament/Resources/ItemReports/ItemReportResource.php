@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\ItemReports;
 
-use App\Filament\Resources\ItemReports\Pages\CreateItemReport;
-use App\Filament\Resources\ItemReports\Pages\EditItemReport;
 use App\Filament\Resources\ItemReports\Pages\ListItemReports;
 use App\Filament\Resources\ItemReports\Pages\ViewItemReport;
 use App\Filament\Resources\ItemReports\Schemas\ItemReportForm;
@@ -30,12 +28,12 @@ class ItemReportResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Audit & Log';
 
-    public static function form(\Filament\Schemas\Schema $form): \Filament\Schemas\Schema
+    public static function form(Schema $form): Schema
     {
         return ItemReportForm::configure($form);
     }
 
-    public static function infolist(\Filament\Schemas\Schema $infolist): \Filament\Schemas\Schema
+    public static function infolist(Schema $infolist): Schema
     {
         return ItemReportInfolist::configure($infolist);
     }
@@ -60,4 +58,3 @@ class ItemReportResource extends Resource
         ];
     }
 }
-

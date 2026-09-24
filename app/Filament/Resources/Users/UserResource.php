@@ -20,6 +20,23 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = User::where('role', 'staff')->where('is_verified', false)->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Staf menunggu verifikasi admin';
+    }
+
     public static function form(Schema $form): Schema
     {
         return UserForm::configure($form);
@@ -46,4 +63,3 @@ class UserResource extends Resource
         ];
     }
 }
-

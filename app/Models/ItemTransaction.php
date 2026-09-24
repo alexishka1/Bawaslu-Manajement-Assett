@@ -56,7 +56,7 @@ class ItemTransaction extends Model
 
         static::updated(function (ItemTransaction $transaction) {
             // Jika tanggal kembali diisi, ubah status jadi tersedia
-            if ($transaction->wasChanged('tanggal_kembali') && !empty($transaction->tanggal_kembali)) {
+            if ($transaction->wasChanged('tanggal_kembali') && ! empty($transaction->tanggal_kembali)) {
                 if ($transaction->item) {
                     $transaction->item->update(['status' => 'tersedia']);
                 }

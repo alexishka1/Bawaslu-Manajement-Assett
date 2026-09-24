@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ItemReports\Schemas;
 
-use Filament\Schemas\Components\ImageEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class ItemReportInfolist
@@ -19,7 +19,7 @@ class ItemReportInfolist
                         TextEntry::make('item.nama_barang')
                             ->label('Barang Dilaporkan')
                             ->weight('bold')
-                            ->description(fn ($record) => $record->item?->kode_bmn ?? '-'),
+                            ->helperText(fn ($record) => $record->item?->kode_bmn ?? '-'),
 
                         TextEntry::make('user.name')
                             ->label('Nama Pelapor')

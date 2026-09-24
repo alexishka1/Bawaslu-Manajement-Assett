@@ -9,9 +9,6 @@ class NomorDokumenService
 {
     /**
      * Generate nomor dokumen otomatis secara atomic (thread-safe).
-     *
-     * @param string $jenisDokumen
-     * @return string
      */
     public static function generate(string $jenisDokumen): string
     {

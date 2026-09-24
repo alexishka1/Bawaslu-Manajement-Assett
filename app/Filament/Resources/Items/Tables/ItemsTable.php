@@ -2,10 +2,17 @@
 
 namespace App\Filament\Resources\Items\Tables;
 
+use App\Models\Item;
+use App\Models\RefRuangan;
+use App\Services\RuanganService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -51,10 +58,19 @@ class ItemsTable
                     ->sortable(),
 
                 TextColumn::make('lokasi_simpan')
-                    ->label('Lokasi')
+                    ->label('Lokasi Detail')
                     ->searchable()
                     ->sortable()
                     ->limit(25),
+
+                TextColumn::make('ruangan.nama_ruangan')
+                    ->label('Ruangan')
+                    ->description(fn (Item $record) => $record->ruangan?->lantai ?? '-')
+                    ->placeholder('Belum Ditentukan')
+                    ->badge()
+                    ->color('info')
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('status')
                     ->label('Status')
@@ -97,10 +113,46 @@ class ItemsTable
                         'Arsip' => 'Arsip',
                     ])
                     ->native(false),
+
+                SelectFilter::make('ref_ruangan_id')
+                    ->label('Filter Ruangan')
+                    ->relationship('ruangan', 'nama_ruangan')
+                    ->preload(),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('cetak_qr')
+                    ->label('Unduh QR')
+                    ->icon('heroicon-o-qr-code')
+                    ->color('info')
+                    ->url(fn (Item $record) => route('qrcode.download', $record))
+                    ->openUrlInNewTab(),
+                Action::make('mutasi_ruangan')
+                    ->label('Pindah Ruang')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->color('warning')
+                    ->schema([
+                        Select::make('ref_ruangan_id')
+                            ->label('Pilih Ruangan Tujuan')
+                            ->options(fn () => RefRuangan::pluck('nama_ruangan', 'id'))
+                            ->required()
+                            ->searchable(),
+                        TextInput::make('alasan')
+                            ->label('Alasan Pemindahan')
+                            ->placeholder('Misal: Kebutuhan sidang sengketa / penataan ulang')
+                            ->required(),
+                    ])
+                    ->action(function (Item $record, array $data) {
+                        $ruangan = RefRuangan::findOrFail($data['ref_ruangan_id']);
+                        app(RuanganService::class)->mutasiItem($record, $ruangan, $data['alasan']);
+
+                        Notification::make()
+                            ->title('Aset Berhasil Dipindahkan')
+                            ->body("Aset {$record->nama_barang} kini tercatat di {$ruangan->nama_ruangan}.")
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

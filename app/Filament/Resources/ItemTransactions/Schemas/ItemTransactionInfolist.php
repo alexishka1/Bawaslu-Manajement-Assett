@@ -2,8 +2,7 @@
 
 namespace App\Filament\Resources\ItemTransactions\Schemas;
 
-use Filament\Schemas\Components\TextEntry;
-use Filament\Schemas\Components\Section;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class ItemTransactionInfolist
@@ -34,5 +33,3 @@ class ItemTransactionInfolist
             ]);
     }
 }
-
-

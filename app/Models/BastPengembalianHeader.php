@@ -93,7 +93,7 @@ class BastPengembalianHeader extends Model
     public function getPihakMenyerahkanDisplayAttribute(): string
     {
         if ($this->pihak_menyerahkan_tipe === 'internal') {
-            return $this->pihakMenyerahkan ? $this->pihakMenyerahkan->nama . ' (' . $this->pihak_menyerahkan_nip . ')' : '-';
+            return $this->pihakMenyerahkan ? $this->pihakMenyerahkan->nama.' ('.$this->pihak_menyerahkan_nip.')' : '-';
         }
 
         return $this->pihak_menyerahkan_nama_manual ?? 'Eksternal';

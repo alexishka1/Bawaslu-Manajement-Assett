@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\BastPemakaianHeaders\Schemas;
 
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class BastPemakaianHeaderInfolist
@@ -55,12 +56,54 @@ class BastPemakaianHeaderInfolist
                         TextEntry::make('pihakPertama.nama')
                             ->label('Pihak Pertama (Pejabat Penyerah)')
                             ->weight('bold')
-                            ->description(fn ($record) => $record->pihakPertama?->jabatan . ' (NIP: ' . $record->pihak_pertama_nip . ')'),
+                            ->helperText(fn ($record) => $record->pihakPertama?->jabatan.' (NIP: '.$record->pihak_pertama_nip.')'),
 
                         TextEntry::make('pihak_kedua_display')
                             ->label('Pihak Kedua (Penerima)')
                             ->weight('bold')
-                            ->description(fn ($record) => $record->pihak_kedua_tipe === 'internal' ? ($record->pihakKedua?->jabatan . ' - ' . $record->pihakKedua?->unit_kerja) : 'Pihak Eksternal'),
+                            ->helperText(fn ($record) => $record->pihak_kedua_tipe === 'internal' ? ($record->pihakKedua?->jabatan.' - '.$record->pihakKedua?->unit_kerja) : 'Pihak Eksternal'),
+                    ]),
+
+                Section::make('Lokasi Peminjam')
+                    ->columns(2)
+                    ->visible(fn ($record) => $record?->hasLokasi() ?? false)
+                    ->schema([
+                        TextEntry::make('alamat_peminjam')
+                            ->label('Alamat')
+                            ->columnSpanFull(),
+
+                        TextEntry::make('latitude')
+                            ->label('Koordinat')
+                            ->formatStateUsing(fn ($record) => "{$record->latitude}, {$record->longitude}"),
+
+                        TextEntry::make('lihat_peta')
+                            ->label('')
+                            ->state('📍 Buka di Peta')
+                            ->url(fn ($record) => "https://www.openstreetmap.org/?mlat={$record->latitude}&mlon={$record->longitude}#map=17/{$record->latitude}/{$record->longitude}")
+                            ->openUrlInNewTab()
+                            ->color('primary')
+                            ->weight('bold'),
+                    ]),
+
+                Section::make('Daftar Barang BMN Diserahterimakan')
+                    ->description('Rincian aset yang tercantum dalam BAST ini.')
+                    ->schema([
+                        RepeatableEntry::make('details')
+                            ->label('')
+                            ->columns(3)
+                            ->schema([
+                                TextEntry::make('item.kode_bmn')
+                                    ->label('Kode BMN')
+                                    ->weight('bold')
+                                    ->color('primary'),
+                                TextEntry::make('item.nama_barang')
+                                    ->label('Nama Barang')
+                                    ->helperText(fn ($record) => 'Kategori: '.($record->item?->kategori ?? '-')),
+                                TextEntry::make('kondisi_saat_diserahkan')
+                                    ->label('Kondisi')
+                                    ->badge()
+                                    ->color('success'),
+                            ]),
                     ]),
             ]);
     }

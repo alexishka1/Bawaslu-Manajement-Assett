@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Items\Pages;
 
 use App\Filament\Resources\Items\ItemResource;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -13,7 +14,7 @@ class ViewItem extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('cetak_qrcode')
+            Action::make('cetak_qrcode')
                 ->label('Cetak QR Code')
                 ->icon('heroicon-o-qr-code')
                 ->color('info')

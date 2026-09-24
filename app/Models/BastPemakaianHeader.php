@@ -24,6 +24,9 @@ class BastPemakaianHeader extends Model
         'pihak_kedua_tipe',
         'pihak_kedua_nip',
         'pihak_kedua_nama_manual',
+        'alamat_peminjam',
+        'latitude',
+        'longitude',
         'ttd_pihak1_url',
         'ttd_pihak2_url',
         'status_dokumen',
@@ -34,6 +37,8 @@ class BastPemakaianHeader extends Model
     {
         return [
             'tanggal_bast' => 'date',
+            'latitude' => 'decimal:8',
+            'longitude' => 'decimal:8',
         ];
     }
 
@@ -89,9 +94,27 @@ class BastPemakaianHeader extends Model
     public function getPihakKeduaDisplayAttribute(): string
     {
         if ($this->pihak_kedua_tipe === 'internal') {
-            return $this->pihakKedua ? $this->pihakKedua->nama . ' (' . $this->pihak_kedua_nip . ')' : '-';
+            return $this->pihakKedua ? $this->pihakKedua->nama.' ('.$this->pihak_kedua_nip.')' : '-';
         }
 
         return $this->pihak_kedua_nama_manual ?? 'Eksternal';
+    }
+
+    /**
+     * Helper: nama peminjam, baik internal (pegawai) maupun eksternal
+     */
+    public function getNamaPeminjamAttribute(): string
+    {
+        return $this->pihak_kedua_tipe === 'internal'
+            ? ($this->pihakKedua?->nama ?? '-')
+            : ($this->pihak_kedua_nama_manual ?? '-');
+    }
+
+    /**
+     * Cek apakah header ini punya titik lokasi valid
+     */
+    public function hasLokasi(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
     }
 }

@@ -111,7 +111,7 @@ class ItemReportsTable
 
                         Notification::make()
                             ->title('Laporan Berhasil Divalidasi')
-                            ->body('Status aset ' . ($record->item?->nama_barang ?? '') . ' kini menjadi ' . ucfirst($record->kondisi_aktual))
+                            ->body('Status aset '.($record->item?->nama_barang ?? '').' kini menjadi '.ucfirst($record->kondisi_aktual))
                             ->success()
                             ->send();
                     }),
@@ -136,6 +136,42 @@ class ItemReportsTable
                             ->send();
                     }),
                 DeleteAction::make(),
+            ])
+            ->headerActions([
+                Action::make('export_csv')
+                    ->label('Export Rekap CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->action(function () {
+                        $reports = ItemReport::with(['item', 'user'])->latest()->get();
+                        $filename = 'Rekap_Laporan_Aset_'.date('Ymd_His').'.csv';
+
+                        $headers = [
+                            'Content-Type' => 'text/csv',
+                            'Content-Disposition' => "attachment; filename=\"$filename\"",
+                        ];
+
+                        $callback = function () use ($reports) {
+                            $handle = fopen('php://output', 'w');
+                            fputcsv($handle, ['ID', 'Kode BMN', 'Nama Barang', 'Pelapor', 'Kondisi Dilaporkan', 'Status Validasi', 'Catatan', 'Tanggal Lapor']);
+
+                            foreach ($reports as $report) {
+                                fputcsv($handle, [
+                                    $report->id,
+                                    $report->item?->kode_bmn ?? '-',
+                                    $report->item?->nama_barang ?? '-',
+                                    $report->user?->name ?? '-',
+                                    ucfirst($report->kondisi_aktual),
+                                    strtoupper($report->status_validasi),
+                                    $report->catatan ?? '-',
+                                    $report->created_at->format('d/m/Y H:i'),
+                                ]);
+                            }
+                            fclose($handle);
+                        };
+
+                        return response()->stream($callback, 200, $headers);
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

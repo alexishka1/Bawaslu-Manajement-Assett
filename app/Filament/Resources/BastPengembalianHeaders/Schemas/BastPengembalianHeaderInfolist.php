@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\BastPengembalianHeaders\Schemas;
 
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class BastPengembalianHeaderInfolist
@@ -48,7 +49,37 @@ class BastPengembalianHeaderInfolist
                         TextEntry::make('pihakMenerima.nama')
                             ->label('Pihak yang Menerima (Pejabat BMN)')
                             ->weight('bold')
-                            ->description(fn ($record) => $record->pihakMenerima?->jabatan . ' (NIP: ' . $record->pihak_menerima_nip . ')'),
+                            ->helperText(fn ($record) => $record->pihakMenerima?->jabatan.' (NIP: '.$record->pihak_menerima_nip.')'),
+                    ]),
+
+                Section::make('Daftar Barang BMN yang Dikembalikan')
+                    ->description('Rincian aset yang diserahkan kembali.')
+                    ->schema([
+                        RepeatableEntry::make('details')
+                            ->label('')
+                            ->columns(3)
+                            ->schema([
+                                TextEntry::make('item.kode_bmn')
+                                    ->label('Kode BMN')
+                                    ->weight('bold')
+                                    ->color('primary'),
+                                TextEntry::make('item.nama_barang')
+                                    ->label('Nama Barang')
+                                    ->helperText(fn ($record) => 'Kategori: '.($record->item?->kategori ?? '-')),
+                                TextEntry::make('kondisi_saat_kembali')
+                                    ->label('Kondisi Saat Kembali')
+                                    ->badge()
+                                    ->color(fn (string $state): string => match ($state) {
+                                        'Baik' => 'success',
+                                        'Rusak Ringan' => 'warning',
+                                        'Rusak Berat', 'Hilang' => 'danger',
+                                        default => 'gray',
+                                    }),
+                                TextEntry::make('catatan_kerusakan')
+                                    ->label('Catatan Kondisi')
+                                    ->columnSpanFull()
+                                    ->placeholder('Tidak ada catatan khusus.'),
+                            ]),
                     ]),
             ]);
     }

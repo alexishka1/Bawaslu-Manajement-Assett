@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Items\Schemas;
 
-use Filament\Schemas\Components\TextEntry;
-use Filament\Schemas\Components\ImageEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -59,5 +59,3 @@ class ItemInfolist
             ]);
     }
 }
-
-

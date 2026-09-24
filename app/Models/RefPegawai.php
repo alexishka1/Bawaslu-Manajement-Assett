@@ -10,8 +10,11 @@ class RefPegawai extends Model
     use HasFactory;
 
     protected $table = 'ref_pegawais';
+
     protected $primaryKey = 'nip';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

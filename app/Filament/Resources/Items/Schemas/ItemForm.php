@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Items\Schemas;
 
-use Filament\Schemas\Components\FileUpload;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class ItemForm
@@ -60,12 +60,20 @@ class ItemForm
                             ->native(false)
                             ->columnSpan(1),
 
+                        Select::make('ref_ruangan_id')
+                            ->label('Penempatan Ruangan')
+                            ->relationship('ruangan', 'nama_ruangan')
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('-- Pilih Ruangan Kantor --')
+                            ->columnSpan(1),
+
                         TextInput::make('lokasi_simpan')
-                            ->label('Lokasi Penyimpanan')
+                            ->label('Lokasi Detail / Rak')
                             ->required()
                             ->maxLength(255)
-                            ->placeholder('Contoh: Gudang Lantai 2, Rak A3')
-                            ->columnSpan(2),
+                            ->placeholder('Contoh: Rak B3, Meja Staf, Lemari Arsip')
+                            ->columnSpan(1),
                     ]),
 
                 Section::make('Media & Identifikasi')
@@ -90,5 +98,3 @@ class ItemForm
             ]);
     }
 }
-
-

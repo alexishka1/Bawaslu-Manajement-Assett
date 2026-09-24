@@ -48,7 +48,7 @@ class BastPemakaianHeadersTable
                     ->label('Penerima (Pihak Kedua)')
                     ->searchable(query: function ($query, string $search) {
                         $query->whereHas('pihakKedua', fn ($q) => $q->where('nama', 'like', "%{$search}%"))
-                              ->orWhere('pihak_kedua_nama_manual', 'like', "%{$search}%");
+                            ->orWhere('pihak_kedua_nama_manual', 'like', "%{$search}%");
                     }),
 
                 TextColumn::make('details_count')
@@ -68,6 +68,41 @@ class BastPemakaianHeadersTable
                     })
                     ->formatStateUsing(fn (string $state): string => strtoupper($state))
                     ->sortable(),
+
+                TextColumn::make('ttd_status')
+                    ->label('Status TTD')
+                    ->badge()
+                    ->state(function (BastPemakaianHeader $record): string {
+                        $signed = 0;
+                        if (! empty($record->ttd_pihak1_url)) {
+                            $signed++;
+                        }
+                        if (! empty($record->ttd_pihak2_url)) {
+                            $signed++;
+                        }
+
+                        return match ($signed) {
+                            2 => 'Lengkap (2/2)',
+                            1 => 'Parsial (1/2)',
+                            default => 'Belum TTD (0/2)',
+                        };
+                    })
+                    ->color(function (BastPemakaianHeader $record): string {
+                        $signed = 0;
+                        if (! empty($record->ttd_pihak1_url)) {
+                            $signed++;
+                        }
+                        if (! empty($record->ttd_pihak2_url)) {
+                            $signed++;
+                        }
+
+                        return match ($signed) {
+                            2 => 'success',
+                            1 => 'warning',
+                            default => 'gray',
+                        };
+                    })
+                    ->alignCenter(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
@@ -89,6 +124,15 @@ class BastPemakaianHeadersTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('tanda_tangan')
+                    ->label('Tanda Tangan')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
+                    ->modalHeading(fn (BastPemakaianHeader $record) => 'Tanda Tangan Digital - '.($record->nomor_bast ?? 'DRAFT'))
+                    ->modalDescription('Buka antarmuka tanda tangan atau minta pegawai scan QR Code di bawah untuk tanda tangan di HP.')
+                    ->modalContent(fn (BastPemakaianHeader $record) => view('filament.actions.bast-pemakaian-ttd-modal', ['record' => $record]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup'),
                 Action::make('cetak_bast')
                     ->label('Cetak BAST PDF')
                     ->icon('heroicon-o-printer')
@@ -107,7 +151,7 @@ class BastPemakaianHeadersTable
                         $record->update(['status_dokumen' => 'final']);
                         Notification::make()
                             ->title('BAST Berhasil Diterbitkan')
-                            ->body('Nomor dokumen: ' . $record->nomor_bast)
+                            ->body('Nomor dokumen: '.$record->nomor_bast)
                             ->success()
                             ->send();
                     }),

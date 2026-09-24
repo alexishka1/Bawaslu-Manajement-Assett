@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Item extends Model
@@ -23,6 +24,7 @@ class Item extends Model
         'lokasi_simpan',
         'qr_code',
         'status',
+        'ref_ruangan_id',
     ];
 
     /**
@@ -34,6 +36,22 @@ class Item extends Model
         'status' => 'string',
         'kategori' => 'string',
     ];
+
+    /**
+     * Get the room where this item is currently placed.
+     */
+    public function ruangan(): BelongsTo
+    {
+        return $this->belongsTo(RefRuangan::class, 'ref_ruangan_id');
+    }
+
+    /**
+     * Get all room mutation records for this item.
+     */
+    public function mutasiRuangans(): HasMany
+    {
+        return $this->hasMany(ItemMutasiRuangan::class);
+    }
 
     /**
      * Get all transactions for the item.
@@ -59,7 +77,14 @@ class Item extends Model
         static::creating(function (Item $item) {
             // Auto-fill qr_code dengan URL halaman scan
             if (empty($item->qr_code)) {
-                $item->qr_code = url('/scan/' . $item->kode_bmn);
+                $item->qr_code = url('/scan/'.$item->kode_bmn);
+            }
+        });
+
+        static::updating(function (Item $item) {
+            // Sinkronkan qr_code jika kode_bmn berubah
+            if ($item->isDirty('kode_bmn') && (empty($item->qr_code) || str_contains($item->qr_code, '/scan/'))) {
+                $item->qr_code = url('/scan/'.$item->kode_bmn);
             }
         });
     }

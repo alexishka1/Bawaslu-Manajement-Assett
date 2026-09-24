@@ -34,12 +34,12 @@ class ItemResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nama_barang';
 
-    public static function form(\Filament\Schemas\Schema $form): \Filament\Schemas\Schema
+    public static function form(Schema $form): Schema
     {
         return ItemForm::configure($form);
     }
 
-    public static function infolist(\Filament\Schemas\Schema $infolist): \Filament\Schemas\Schema
+    public static function infolist(Schema $infolist): Schema
     {
         return ItemInfolist::configure($infolist);
     }
@@ -66,4 +66,3 @@ class ItemResource extends Resource
         ];
     }
 }
-

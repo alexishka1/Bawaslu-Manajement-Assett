@@ -3,14 +3,14 @@
 namespace App\Filament\Resources\BastPengembalianHeaders\Schemas;
 
 use App\Models\BastPemakaianDetail;
+use App\Models\Item;
 use App\Models\RefPegawai;
 use App\Models\RefPejabat;
-use Filament\Schemas\Components\DatePicker;
-use Filament\Schemas\Components\Hidden;
-use Filament\Schemas\Components\Repeater;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class BastPengembalianHeaderForm
@@ -112,8 +112,9 @@ class BastPengembalianHeaderForm
                                         }
 
                                         return $query->get()->mapWithKeys(function ($d) {
-                                            $itemName = $d->item ? $d->item->kode_bmn . ' — ' . $d->item->nama_barang : 'Item #' . $d->item_id;
+                                            $itemName = $d->item ? $d->item->kode_bmn.' — '.$d->item->nama_barang : 'Item #'.$d->item_id;
                                             $bastNomor = $d->header?->nomor_bast ?? 'DRAFT';
+
                                             return [$d->id => "{$itemName} (BAST Asal: {$bastNomor})"];
                                         });
                                     })
@@ -142,8 +143,9 @@ class BastPengembalianHeaderForm
                                     ->columnSpan(1),
 
                                 Select::make('item_id')
-                                    ->label('Konfirmasi ID Barang')
-                                    ->options(fn () => \App\Models\Item::pluck('nama_barang', 'id'))
+                                    ->label('Barang yang Dikembalikan')
+                                    ->options(fn () => Item::all()->mapWithKeys(fn ($item) => [$item->id => "{$item->kode_bmn} — {$item->nama_barang}"]))
+                                    ->searchable()
                                     ->required()
                                     ->columnSpan(1),
 
